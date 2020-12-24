@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "autoitemswitch",
+  "version": "${version}",
+
+  "name": "AutoItemSwitch",
+  "description": "Automatically equips a new stack to hand when the old one is depleted.",
+  "authors": [
+    "Svegon"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/autoitemswitch/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.autoitemswitch.AISInit"
+    ],
+	
+    "client": [
+      "net.autoitemswitch.AISInit"
+    ],
+	
+    "server": [
+      "net.autoitemswitch.AISInit"
+    ]
+  },
+  "mixins": [
+    "autoitemswitch.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.4"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}

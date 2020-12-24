@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.autoitemswitch.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+	"ItemStackMixin"
+  ],
+  "client": [
+	"ClientConnectionMixin",
+	"ClientPlayerEntityMixin",
+	"ClientPlayerInteractionManagerMixin"
+  ],
+  "server": [
+	"ServerPlayerInteractionManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
