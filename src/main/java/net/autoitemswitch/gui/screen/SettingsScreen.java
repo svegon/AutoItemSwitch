@@ -8,7 +8,7 @@ import net.minecraft.text.TranslatableText;
 @Environment(EnvType.CLIENT)
 public class SettingsScreen extends Screen {
 	public SettingsScreen() {
-		super(new TranslatableText("mco.autoitemswitch.settings"));
+		super(new TranslatableText("autoitemswitch.settingsScreen.title"));
 	}
 	
 	protected void init() {

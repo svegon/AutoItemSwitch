@@ -9,7 +9,8 @@
   "client": [
 	"ClientConnectionMixin",
 	"ClientPlayerEntityMixin",
-	"ClientPlayerInteractionManagerMixin"
+	"ClientPlayerInteractionManagerMixin",
+	"MinecraftClientMixin"
   ],
   "server": [
 	"ServerPlayerInteractionManagerMixin"

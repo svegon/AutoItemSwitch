@@ -17,22 +17,20 @@ import net.autoitemswitch.events.StoppedUsingItemEvent;
 import net.autoitemswitch.events.StoppedUsingItemListener;
 import net.autoitemswitch.settings.ClientSettings;
 import net.autoitemswitch.utils.ItemUtils;
+import net.autoitemswitch.utils.PacketUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.TridentItem;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public final class ClientAIS extends AutoItemSwitch implements BlockInteractionListener,
 		ItemUseListener, PacketInputHandleListener, PacketInputListener, StoppedUsingItemListener {
-	private static final MinecraftClient MC = MinecraftClient.getInstance();
+	private static MinecraftClient mc;
 	
 	@Nullable
 	private Item brokenItem;
@@ -42,7 +40,8 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 	private EquipmentSlot consumedSlot;
 	
 	public ClientAIS() {
-		SharedVariables.modDirectory = MC.runDirectory.toPath().resolve("AutoItemSwitch");
+		mc = MinecraftClient.getInstance();
+		SharedVariables.modDirectory = mc.runDirectory.toPath().resolve("AutoItemSwitch");
 
 		try {
 			Files.createDirectories(SharedVariables.modDirectory);
@@ -51,7 +50,7 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 		}
 		
 		SharedVariables.settings = new ClientSettings();
-		SharedVariables.EVENT_HANDLER.client();
+		SharedVariables.EVENT_HANDLER.clientInit();
 
 		SharedVariables.EVENT_HANDLER.addBlockInteractionListener(this);
 		SharedVariables.EVENT_HANDLER.addItemUseListener(this);
@@ -63,7 +62,7 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 	public void onBlockInteraction(BlockInteractionEvent event) {
 		SharedVariables.LOGGER.error(event.getStack() + " " + event.getWorld().getRegistryKey().getValue() + " " + event.getPlayer().getDisplayName().asString() + " " + (event.getHand() == Hand.OFF_HAND ? "OFF_HAND" : "MAIN_HAND"));
 		
-		if(!MC.player.getStackInHand(event.getHand()).isEmpty())
+		if(!mc.player.getStackInHand(event.getHand()).isEmpty())
 			return;
 		
 		ItemStack stack = event.getStack();
@@ -84,10 +83,10 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 	public void onItemUse(ItemUseEvent event) {
 		SharedVariables.LOGGER.error(event.getStack() + " " + event.getWorld().getRegistryKey().getValue() + " " + event.getPlayer().getDisplayName().asString() + " " + (event.getHand() == Hand.OFF_HAND ? "OFF_HAND" : "MAIN_HAND"));
 
-		if(event.getPlayer() != MC.player)
+		if(event.getPlayer() != mc.player)
 			return;
 		
-		if(!MC.player.getStackInHand(event.getHand()).isEmpty())
+		if(!mc.player.getStackInHand(event.getHand()).isEmpty())
 			return;
 		
 		ItemStack stack = event.getStack();
@@ -109,7 +108,7 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 		if(event.getPacket() instanceof EntityStatusS2CPacket) {
 			EntityStatusS2CPacket packet = (EntityStatusS2CPacket)event.getPacket();
 			
-			if(packet.getEntity(MC.world) != MC.player)
+			if(packet.getEntity(mc.world) != mc.player)
 				return;
 			
 			byte status = packet.getStatus();
@@ -117,16 +116,16 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 			if(47 <= status && status <= 52) {
 				SharedVariables.LOGGER.error("Replacing broken item");
 				
-				EquipmentSlot slot = breakStatusToEquipmentSlot(packet.getStatus());
+				EquipmentSlot slot = PacketUtils.breakStatusToEquipmentSlot(packet.getStatus());
 
-				brokenItem = MC.player.getEquippedStack(slot).getItem();
+				brokenItem = mc.player.getEquippedStack(slot).getItem();
 				brokenSlot = slot;
 				
 				return;
 			}
 			
 			if(status == 9) {
-				ItemStack stack = MC.player.getActiveItem();
+				ItemStack stack = mc.player.getActiveItem();
 				
 				if(stack.isEmpty()) {
 					SharedVariables.LOGGER.error("Received a consumption packet while none is in use.");
@@ -134,7 +133,7 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 				}
 				
 				consumedItem = stack.getItem();
-				consumedSlot = MC.player.getActiveHand() == Hand.OFF_HAND ? EquipmentSlot.OFFHAND
+				consumedSlot = mc.player.getActiveHand() == Hand.OFF_HAND ? EquipmentSlot.OFFHAND
 						: EquipmentSlot.MAINHAND;
 			}
 		}
@@ -147,7 +146,7 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 			
 			brokenItem = null;
 		} else if(consumedItem != null) {
-			if(MC.player.getEquippedStack(consumedSlot).isEmpty())
+			if(mc.player.getEquippedStack(consumedSlot).isEmpty())
 				reequipItem(consumedItem, consumedSlot);
 			
 			consumedItem = null;
@@ -161,7 +160,7 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 		if(!(item instanceof TridentItem))
 			return;
 		
-		if(!MC.player.getMainHandStack().isEmpty())
+		if(!mc.player.getMainHandStack().isEmpty())
 			return;
 		
 		reequipItem(item, EquipmentSlot.MAINHAND);
@@ -170,23 +169,27 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 	private boolean reequipItem(Item itemToRenew, EquipmentSlot slot) {
 		int slotId;
 		
-		for(Item item : SharedVariables.settings.getSwitchableItems(itemToRenew)) {
-			slotId = ItemUtils.getSlotWithItem(MC.player.inventory, item);
+		for(Item item : SharedVariables.settings.getSwitchMap(mc.player).get(itemToRenew)) {
+			slotId = ItemUtils.getSlotWithItem(mc.player.inventory, item);
 			
 			if(slotId < 0)
 				continue;
 			
-			if(slot == EquipmentSlot.MAINHAND)
-				MC.interactionManager.clickSlot(MC.player.currentScreenHandler.syncId,
-						slotId < 9 ? slotId + 36 : slotId, MC.player.inventory.selectedSlot,
-								SlotActionType.SWAP, MC.player);
-			else if(slot == EquipmentSlot.OFFHAND)
-				MC.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
-						PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN,
-						Direction.DOWN));
-			else
-				MC.interactionManager.clickSlot(MC.player.currentScreenHandler.syncId,
-						slotId < 9 ? slotId + 36 : slotId, 0, SlotActionType.QUICK_MOVE, MC.player);
+			switch(slot) {
+			case MAINHAND:
+				mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId,
+						slotId < 9 ? slotId + 36 : slotId, mc.player.inventory.selectedSlot,
+								SlotActionType.SWAP, mc.player);
+				break;
+			case OFFHAND:
+				mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId,
+						slotId < 9 ? slotId + 36 : slotId, 40, SlotActionType.SWAP, mc.player);
+				break;
+			default:
+				mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId,
+						slotId < 9 ? slotId + 36 : slotId, 0, SlotActionType.QUICK_MOVE, mc.player);
+				break;
+			}
 			
 			SharedVariables.LOGGER.error("Successfully reequipped " + itemToRenew + ".");
 			return true;
@@ -194,22 +197,5 @@ public final class ClientAIS extends AutoItemSwitch implements BlockInteractionL
 	
 		SharedVariables.LOGGER.error("Failed to reequip " + itemToRenew + ".");
 		return false;
-	}
-	
-	private EquipmentSlot breakStatusToEquipmentSlot(byte status) {
-		switch(status) {
-		case 48:
-			return EquipmentSlot.OFFHAND;
-		case 49:
-			return EquipmentSlot.HEAD;
-		case 50:
-			return EquipmentSlot.CHEST;
-		case 51:
-			return EquipmentSlot.LEGS;
-		case 52:
-			return EquipmentSlot.FEET;
-		default:
-			return EquipmentSlot.MAINHAND;
-		}
 	}
 }

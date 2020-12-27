@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.autoitemswitch.SharedVariables;
 import net.autoitemswitch.events.BlockInteractionEvent;
 import net.autoitemswitch.events.ItemUseEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
@@ -17,6 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 
+@Environment(EnvType.SERVER)
 @Mixin(ServerPlayerInteractionManager.class)
 public abstract class ServerPlayerInteractionManagerMixin {
 	private ItemStack interactedStack;
@@ -44,15 +47,15 @@ public abstract class ServerPlayerInteractionManagerMixin {
 	}
 	
 	@Inject(at = {@At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;"
-			+ "useOnBlock(Lnet/minecraft/item/ItemUsageContext;)Lnet/minecraft/utilActionResult;",
+			+ "useOnBlock(Lnet/minecraft/item/ItemUsageContext;)Lnet/minecraft/util/ActionResult;",
 			ordinal = 1)}, method = {"interactBlock"})
 	private void preInteractBlock(ServerPlayerEntity player, World world, ItemStack stack,
 			Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
 		blockInteractedStack = stack.copy();
 	}
-	
+
 	@Inject(at = {@At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;"
-			+ "useOnBlock(Lnet/minecraft/item/ItemUsageContext;)Lnet/minecraft/utilActionResult;",
+			+ "useOnBlock(Lnet/minecraft/item/ItemUsageContext;)Lnet/minecraft/util/ActionResult;",
 			shift = Shift.AFTER, ordinal = 1)}, method = {"interactBlock"})
 	private void postInteractBlock(ServerPlayerEntity player, World world, ItemStack stack,
 			Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {

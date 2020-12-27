@@ -24,6 +24,10 @@ public final class ChatUtils {
 	private static final String SYNTAX_ERROR_PREFIX =
 		"\u00a74Syntax error:\u00a7r ";
 	
+	private ChatUtils() {
+		throw new AssertionError();
+	}
+	
 	@SuppressWarnings("resource")
 	@Environment(EnvType.CLIENT)
 	public static void component(Text component) {

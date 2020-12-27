@@ -3,7 +3,6 @@ package net.autoitemswitch;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import net.autoitemswitch.settings.ServerSettings;
 
@@ -18,7 +17,7 @@ public final class ServerAIS extends AutoItemSwitch {
 		}
 		
 		SharedVariables.settings = new ServerSettings();
-		SharedVariables.EVENT_HANDLER.server();
+		SharedVariables.EVENT_HANDLER.serverInit();
 		
 		throw new RuntimeException("Server AutoItemSwitch hasn't been made yet.");
 	}

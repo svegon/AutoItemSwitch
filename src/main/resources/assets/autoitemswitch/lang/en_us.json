@@ -1,3 +1,5 @@
 {
-	"autoitemswitch.settings_screen.title": ""
+	"autoitemswitch.settingsScreen.title": "AutoItemSwitch settings",
+	"key.autoitemswitch.settings": "Open AutoItemSwitch settings screen",
+	"key.categories.autoitemswitch": "AutoItemSwitch"
 }

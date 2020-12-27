@@ -142,12 +142,12 @@ public class EventHandler implements StartTick,
 	}
 	
 	@Environment(EnvType.CLIENT)
-	public void client() {
+	public void clientInit() {
 		ClientTickEvents.START_CLIENT_TICK.register(this);
 	}
 	
 	@Environment(EnvType.SERVER)
-	public void server() {
+	public void serverInit() {
 		ServerTickEvents.START_SERVER_TICK.register(this);
 	}
 }

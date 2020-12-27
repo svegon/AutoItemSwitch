@@ -5,6 +5,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public final class ItemUtils {
+	private ItemUtils() {
+		throw new AssertionError();
+	}
+	
 	public static boolean areItemsEqual(ItemStack stack1, ItemStack stack2) {
 		return (stack1.isEmpty() && stack2.isEmpty()) || (stack1.getItem() == stack2.getItem()
 				&& stack1.getTag().equals(stack2.getTag()));

@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import net.autoitemswitch.SharedVariables;
 import net.autoitemswitch.events.BlockInteractionEvent;
 import net.autoitemswitch.events.ItemUseEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
@@ -19,6 +21,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 
+@Environment(EnvType.CLIENT)
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin {
 	private ItemStack interactedStack;

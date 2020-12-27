@@ -8,15 +8,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.AsciiHeadersEncoder.SeparatorType;
 import net.autoitemswitch.SharedVariables;
 import net.autoitemswitch.events.PacketInputEvent;
+import net.autoitemswitch.events.PacketInputHandleEvent;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
 
 @Mixin(ClientConnection.class)
-public abstract class ClientConnectionMixin
-		extends SimpleChannelInboundHandler<Packet<?>> {
+public abstract class ClientConnectionMixin extends SimpleChannelInboundHandler<Packet<?>> {
 	@Inject(at = {@At(value = "INVOKE",
 		target = "Lnet/minecraft/network/ClientConnection;handlePacket(Lnet/minecraft/network/Packet;"
 				+ "Lnet/minecraft/network/listener/PacketListener;)V",
@@ -41,6 +40,14 @@ public abstract class ClientConnectionMixin
 				+ "Lnet/minecraft/network/Packet;)V"})
 	private void postChannelRead0(ChannelHandlerContext channelHandlerContext,
 			Packet<?> packet, CallbackInfo ci) {
-		
+		SharedVariables.EVENT_HANDLER.onPacketInputHandle(new PacketInputHandleEvent(packet));
+	}
+	
+	@Inject(at = {@At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;"
+			+ "disconnect(Lnet/minecraft/text/Text;)V")}, method = {"exceptionCaught"})
+	private void onExceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable,
+			CallbackInfo info) {
+		SharedVariables.LOGGER.error("An unexpected exception was thrown while joining a server:",
+				throwable);
 	}
 }

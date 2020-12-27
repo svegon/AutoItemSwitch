@@ -15,12 +15,4 @@ public final class SharedVariables {
 	public static Path modDirectory;
 	public static AISSettings settings;
 	public static AutoItemSwitch mod;
-	
-	public static boolean isClient() {
-		return mod instanceof ClientAIS;
-	}
-	
-	public static boolean isServer() {
-		return mod instanceof ServerAIS;
-	}
 }

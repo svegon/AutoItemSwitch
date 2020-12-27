@@ -40,18 +40,18 @@ public abstract class ItemStackMixin {
 	}
 	
 	@Inject(at = {@At("HEAD")}, method = {"onStoppedUsing"})
-	private void preOnStoppedUsing(World world, LivingEntity user, int remainingUseTicks) {
+	private void preOnStoppedUsing(World world, LivingEntity user, int remainingUseTicks,
+			CallbackInfo ci) {
 		this.usedStack = this.copy();
 	}
 	
 	@Inject(at = {@At("TAIL")}, method = {"onStoppedUsing"})
-	private void postOnStoppedUsing(World world, LivingEntity user, int remainingUseTicks) {
+	private void postOnStoppedUsing(World world, LivingEntity user, int remainingUseTicks,
+			CallbackInfo ci) {
 		SharedVariables.EVENT_HANDLER.onStoppedUsingItem(new StoppedUsingItemEvent(
 				this.usedStack, world, user, remainingUseTicks));
 	}
 	
 	@Shadow
-	public ItemStack copy() {
-		return null;
-	}
+	public abstract ItemStack copy();
 }

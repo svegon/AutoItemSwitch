@@ -31,6 +31,10 @@ public final class JsonUtils {
 	
 	public static final JsonParser JSON_PARSER = new JsonParser();
 	
+	private JsonUtils() {
+		throw new AssertionError();
+	}
+	
 	public static JsonElement parseFile(Path path) throws IOException {
 		BufferedReader reader = Files.newBufferedReader(path);
 		return JSON_PARSER.parse(reader);
